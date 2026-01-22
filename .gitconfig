@@ -1,3 +1,12 @@
 [user]
   name = yisselda-bbr
   email = yrhoc@bbrpartners.com
+
+[alias]
+  ci = commit
+  co = checkout
+  br = branch
+  st = status
+  poh = push --set-upstream origin HEAD
+  ll = log --oneline
+  amend = commit --amend --no-edit
