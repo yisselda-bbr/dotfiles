@@ -8,10 +8,15 @@ autoload -Uz vcs_info
 precmd() {
   vcs_info
   branch="${vcs_info_msg_0_#* }"
-  if [[ -n $branch ]]; then
-    PROMPT=$'\n🌻 %~ ('"$branch") $ '
+  if [[ -n $VIRTUAL_ENV ]]; then
+    venv_name="{${VIRTUAL_ENV:t}} "
   else
-    PROMPT=$'\n🌻 %~ $ '
+    venv_name=""
+  fi
+  if [[ -n $branch ]]; then
+    PROMPT=$'\n'$venv_name'🌻 %~ ('"$branch") $ '
+  else
+    PROMPT=$'\n'$venv_name'🌻 %~ $ '
   fi
 }
 
