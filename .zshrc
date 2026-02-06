@@ -9,9 +9,9 @@ precmd() {
   vcs_info
   branch="${vcs_info_msg_0_#* }"
   if [[ -n $branch ]]; then
-    PROMPT='🌻 %~ ('"$branch"') $ '
+    PROMPT=$'\n🌻 %~ ('"$branch") $ '
   else
-    PROMPT='🌻 %~ $ '
+    PROMPT=$'\n🌻 %~ $ '
   fi
 }
 
