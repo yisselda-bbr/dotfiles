@@ -9,7 +9,7 @@ if [ ! -d "$NVM_DIR" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 fi
 if [ -s "$NVM_DIR/nvm.sh" ]; then
-  source "$NVM_DIR/nvm.sh"
+  . "$NVM_DIR/nvm.sh"
 fi
 if ! command -v node > /dev/null; then
   nvm install --lts
