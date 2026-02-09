@@ -1,7 +1,8 @@
 #!/bin/sh
-ln -sf "$PWD/.zshrc" "$HOME/.zshrc"
-ln -sf "$PWD/aliases.zsh" "$HOME/.aliases.zsh"
-ln -sf "$PWD/.gitconfig" "$HOME/.gitconfig"
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+ln -sf "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
+ln -sf "$DOTFILES_DIR/aliases.zsh" "$HOME/.aliases.zsh"
+ln -sf "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
 
 # Node & nvm setup
 export NVM_DIR="$HOME/.nvm"
