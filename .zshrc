@@ -71,3 +71,17 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
   --color=info:#afaf87,prompt:#d7af5f,pointer:#af5f5f
   --color=marker:#87ff00,spinner:#af5f5f,header:#87afaf'
 
+  
+# 1. Word-by-word (Alt + Arrows)
+bindkey '^[[1;3D' backward-word
+bindkey '^[[1;3C' forward-word
+
+# 2. Line Start/End (Control + Arrows)
+bindkey '^[[1;5D' beginning-of-line
+bindkey '^[[1;5C' end-of-line
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+export PATH="$HOME/.local/bin:$PATH"
