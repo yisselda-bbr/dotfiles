@@ -28,55 +28,16 @@ if ! command -v just >/dev/null 2>&1; then
   rm -f /tmp/just /tmp/just.tar.gz
 fi
 
-# Install uv and Python 3.13
+# Python 3.13 via uv
 if ! command -v uv >/dev/null 2>&1; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 export PATH="$HOME/.local/bin:$PATH"
 uv python install 3.13
 
-# Only use apt when one of the required packages is missing. Let apt wait for
-# the dpkg lock, which may be held by unattended-upgrades during VM startup.
-if command -v apt-get >/dev/null 2>&1; then
-  pkgs=(postgresql-client redis-tools libpq-dev)
-  missing=()
-  for pkg in "${pkgs[@]}"; do
-    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
-      missing+=("$pkg")
-    fi
-  done
-
-  if ((${#missing[@]})); then
-    echo "Installing missing apt packages: ${missing[*]}"
-    apt_opts=(-o DPkg::Lock::Timeout=900)
-    update_succeeded=false
-    for i in {1..30}; do
-      if sudo apt-get "${apt_opts[@]}" update; then
-        update_succeeded=true
-        break
-      fi
-      echo "apt update busy, retrying ($i/30)..."
-      sleep 10
-    done
-    if [[ "$update_succeeded" != true ]]; then
-      echo "apt-get update failed after 30 attempts" >&2
-      exit 1
-    fi
-
-    install_succeeded=false
-    for i in {1..30}; do
-      if sudo apt-get "${apt_opts[@]}" install -y "${missing[@]}"; then
-        install_succeeded=true
-        break
-      fi
-      if [[ "$i" -eq 30 ]]; then
-        echo "apt install failed after 30 attempts" >&2
-        exit 1
-      fi
-      echo "apt install busy, retrying ($i/30)..."
-      sleep 10
-    done
-  else
-    echo "apt packages already present, skipping"
-  fi
+# Install redis-cli via Homebrew, avoiding apt lock contention with bbr_init.
+if ! command -v redis-cli >/dev/null 2>&1; then
+  brew install redis
 fi
+
+echo "Dotfiles installation complete."
