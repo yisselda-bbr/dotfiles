@@ -35,9 +35,19 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 uv python install 3.13
 
-# Install redis-cli via Homebrew, avoiding apt lock contention with bbr_init.
+# Load Homebrew, which may not be on PATH in non-login shells.
+BREW=/home/linuxbrew/.linuxbrew/bin/brew
+if [[ -x "$BREW" ]]; then
+  eval "$("$BREW" shellenv)"
+fi
+
+# Install redis-cli via Homebrew without making Redis failures fatal.
 if ! command -v redis-cli >/dev/null 2>&1; then
-  brew install redis
+  if command -v brew >/dev/null 2>&1; then
+    brew install redis || echo "WARN: brew install redis failed" >&2
+  else
+    echo "WARN: brew not found, skipping redis-cli" >&2
+  fi
 fi
 
 echo "Dotfiles installation complete."
