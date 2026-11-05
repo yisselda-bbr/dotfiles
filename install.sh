@@ -6,19 +6,6 @@ ln -sf "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
 ln -sf "$DOTFILES_DIR/aliases.zsh" "$HOME/.aliases.zsh"
 ln -sf "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
 
-# Wait for apt lock to clear
-apt_retry() {
-  local retries=30
-  for i in $(seq 1 "$retries"); do
-    if sudo apt-get "$@"; then
-      return 0
-    fi
-    echo "apt busy, retrying ($i/$retries)..."
-    sleep 5
-  done
-  return 1
-}
-
 # Node & nvm setup
 export NVM_DIR="$HOME/.nvm"
 if [ ! -d "$NVM_DIR" ]; then
@@ -48,7 +35,35 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 uv python install 3.13
 
+# Only use apt when one of the required packages is missing. Let apt wait for
+# the dpkg lock, which may be held by unattended-upgrades during VM startup.
 if command -v apt-get >/dev/null 2>&1; then
-  apt_retry update
-  apt_retry install -y curl git postgresql postgresql-client redis-tools build-essential libpq-dev python3.13 python3.13-venv python3.13-dev
+  pkgs=(postgresql-client redis-tools libpq-dev)
+  missing=()
+  for pkg in "${pkgs[@]}"; do
+    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+      missing+=("$pkg")
+    fi
+  done
+
+  if ((${#missing[@]})); then
+    echo "Installing missing apt packages: ${missing[*]}"
+    apt_opts=(-o DPkg::Lock::Timeout=900)
+    update_succeeded=false
+    for i in {1..30}; do
+      if sudo apt-get "${apt_opts[@]}" update; then
+        update_succeeded=true
+        break
+      fi
+      echo "apt update busy, retrying ($i/30)..."
+      sleep 10
+    done
+    if [[ "$update_succeeded" != true ]]; then
+      echo "apt-get update failed after 30 attempts" >&2
+      exit 1
+    fi
+    sudo apt-get "${apt_opts[@]}" install -y "${missing[@]}"
+  else
+    echo "apt packages already present, skipping"
+  fi
 fi
