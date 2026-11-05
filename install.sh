@@ -62,7 +62,20 @@ if command -v apt-get >/dev/null 2>&1; then
       echo "apt-get update failed after 30 attempts" >&2
       exit 1
     fi
-    sudo apt-get "${apt_opts[@]}" install -y "${missing[@]}"
+
+    install_succeeded=false
+    for i in {1..30}; do
+      if sudo apt-get "${apt_opts[@]}" install -y "${missing[@]}"; then
+        install_succeeded=true
+        break
+      fi
+      if [[ "$i" -eq 30 ]]; then
+        echo "apt install failed after 30 attempts" >&2
+        exit 1
+      fi
+      echo "apt install busy, retrying ($i/30)..."
+      sleep 10
+    done
   else
     echo "apt packages already present, skipping"
   fi
